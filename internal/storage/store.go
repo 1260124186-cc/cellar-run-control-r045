@@ -78,29 +78,10 @@ func normalizeSnapshot(value domain.Snapshot) (domain.Snapshot, error) {
 	if value.RunIndex == nil {
 		value.RunIndex = map[string]string{}
 	}
-	if err := reconcileCleaningHistory(&value); err != nil {
-		return domain.Snapshot{}, err
-	}
 	if err := validateIndexes(value); err != nil {
 		return domain.Snapshot{}, err
 	}
 	return value, nil
-}
-
-func reconcileCleaningHistory(value *domain.Snapshot) error {
-	for id, vessel := range value.Vessels {
-		if !vessel.HasCleaningHistory() || vessel.ActiveRunID == nil {
-			continue
-		}
-		if vessel.CleaningHistoryMatches(*vessel.ActiveRunID) {
-			continue
-		}
-		if err := vessel.ReplayCleaningCompletion(time.Now().UTC()); err != nil {
-			return fmt.Errorf("reconcile vessel %s cleaning history: %w", id, err)
-		}
-		value.Vessels[id] = vessel
-	}
-	return nil
 }
 
 func validateIndexes(value domain.Snapshot) error {

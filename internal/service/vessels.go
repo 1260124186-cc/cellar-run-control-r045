@@ -91,13 +91,9 @@ func (s *Service) FinishCleaning(
 			return err
 		}
 		now := s.clock.Now()
-		if vessel.State != domain.VesselCleaning && vessel.HasCleaningHistory() {
-			if err := vessel.ReplayCleaningCompletion(now); err != nil {
-				return err
-			}
-			snapshot.Vessels[id] = vessel
-			updated = vessel
-			return nil
+		if vessel.State != domain.VesselCleaning {
+			return domain.NewError(domain.CodeVesselState,
+				"vessel is not waiting for cleaning; a completed cleaning is historical and cannot be replayed")
 		}
 		if vessel.ActiveRunID == nil {
 			return domain.NewError(domain.CodeVesselState,

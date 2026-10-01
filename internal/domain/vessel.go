@@ -92,26 +92,6 @@ func (v *Vessel) CompleteCleaning(runID string, now time.Time) error {
 	return nil
 }
 
-func (v *Vessel) ReplayCleaningCompletion(now time.Time) error {
-	if v.LastCleanedRunID == "" {
-		return NewError(CodeVesselState, "vessel has no completed cleaning record")
-	}
-	stamp := now.UTC()
-	v.State = VesselAvailable
-	v.ActiveRunID = nil
-	v.UpdatedAt = stamp
-	v.Version++
-	return nil
-}
-
-func (v Vessel) HasCleaningHistory() bool {
-	return v.LastCleanedRunID != ""
-}
-
-func (v Vessel) CleaningHistoryMatches(runID string) bool {
-	return v.LastCleanedRunID != "" && v.LastCleanedRunID == runID
-}
-
 func (v *Vessel) ReleaseReservation(runID string, now time.Time) error {
 	if v.State != VesselReserved && v.State != VesselInUse {
 		return NewError(CodeVesselState, "vessel does not have a releasable run")
