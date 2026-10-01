@@ -91,17 +91,9 @@ func (s *Service) FinishCleaning(
 			return err
 		}
 		now := s.clock.Now()
-		if vessel.State != domain.VesselCleaning && vessel.HasCleaningHistory() {
-			if err := vessel.ReplayCleaningCompletion(now); err != nil {
-				return err
-			}
-			snapshot.Vessels[id] = vessel
-			updated = vessel
-			return nil
-		}
-		if vessel.ActiveRunID == nil {
+		if vessel.State != domain.VesselCleaning || vessel.ActiveRunID == nil {
 			return domain.NewError(domain.CodeVesselState,
-				"cleaning vessel has no associated run")
+				"vessel is not waiting for cleaning")
 		}
 		run, ok := snapshot.Runs[*vessel.ActiveRunID]
 		if !ok {
